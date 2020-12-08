@@ -100,8 +100,11 @@ def convert_stverts(mdl, stverts):
         st.s = int(st.s * (mdl.skinwidth - 1))
         st.t = int((1 - st.t) * (mdl.skinheight - 1))
         # ensure st is within the skin
-        st.s = ((st.s % mdl.skinwidth) + mdl.skinwidth) % mdl.skinwidth
-        st.t = ((st.t % mdl.skinheight) + mdl.skinheight) % mdl.skinheight
+        if (mdl.skinwidth and mdl.skinheight):
+          st.s = ((st.s % mdl.skinwidth) + mdl.skinwidth) % mdl.skinwidth
+          st.t = ((st.t % mdl.skinheight) + mdl.skinheight) % mdl.skinheight
+        else:
+          st.s = st.t = 0
 
 def make_frame(frame, mesh):
     for mv in mesh.vertices:
@@ -160,6 +163,7 @@ def export_md2(
                 mesh = ob_eval.to_mesh()
                 if xform:
                     mesh.transform(mdl.obj.matrix_world)
+                    mesh.calc_normals_split()
                 frame = make_frame(frame, mesh)
             mdl.frames.append(frame)
 

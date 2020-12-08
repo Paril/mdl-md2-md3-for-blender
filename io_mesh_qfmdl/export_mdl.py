@@ -410,6 +410,7 @@ def export_mdl(
                 mesh = ob_eval.to_mesh()
                 if xform:
                     mesh.transform(mdl.obj.matrix_world)
+                    mesh.calc_normals_split()
                 frame = make_frame(frame, mesh, vertmap[i])
             mdl.frames.append(frame)
 
