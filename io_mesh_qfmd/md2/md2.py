@@ -21,6 +21,7 @@
 
 from struct import unpack, pack
 from mathutils import Vector
+from sys import maxsize
 
 class MD2:
     class Skin:
@@ -70,8 +71,8 @@ class MD2:
             self.verts.append(vert)
         def calc_scale(self):
             # only used for writing
-            mins = [9999, 9999, 9999]
-            maxs = [-9999, -9999, -9999]
+            mins = [maxsize, maxsize, maxsize]
+            maxs = [-(maxsize - 1), -(maxsize - 1), -(maxsize - 1)]
 
             for vert in self.verts:
                 for i, v in enumerate(vert.r):
@@ -128,7 +129,6 @@ class MD2:
             mdl.write_byte(r)
             mdl.write_byte(self.ni)
         def scale(self, frame):
-            old_r = self.r
             self.r = tuple(map(lambda x, s, t: (x - t) / s,
                                self.r, frame.scale, frame.translate))
 
@@ -225,7 +225,7 @@ class MD2:
         self.stverts = []
         self.tris = []
         self.frames = []
-        pass
+
     def read(self, filepath):
         self.file = open(filepath, "rb")
         self.name = filepath.split('/')[-1]
@@ -233,6 +233,7 @@ class MD2:
         self.ident = self.read_string(4)
         self.version = self.read_int()
         if self.ident != "IDP2" or self.version != 8:
+            self.file.close()
             return None
         self.skinwidth, self.skinheight = self.read_int(2)
         framesize = self.read_int()
@@ -296,3 +297,4 @@ class MD2:
         #write out the frames
         for frame in self.frames:
             frame.write(self)
+        self.file.close()

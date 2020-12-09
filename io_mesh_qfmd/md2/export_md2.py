@@ -23,7 +23,7 @@ import bpy
 from bpy_extras.object_utils import object_data_add
 from mathutils import Vector,Matrix
 
-from .quakenorm import map_normal
+from ..quakenorm import map_normal
 from .md2 import MD2
 
 def check_faces(mesh):
@@ -47,28 +47,24 @@ def check_faces(mesh):
     mesh.update()
     return True
 
-def active_uv(mesh):
-    for uvt in mesh.uv_layers:
-        if uvt.active:
-            return uvt
-    return None
-
 def make_skin(operator, mdl, mesh):
-    uvt = active_uv(mesh)
     mdl.skinwidth, mdl.skinheight = (4, 4)
 
     materials = bpy.context.object.data.materials
 
-    if len(materials) > 0:
-        for mat in materials:
-            allTextureNodes = list(filter(lambda node: node.type == "TEX_IMAGE", mat.node_tree.nodes))
-            if len(allTextureNodes) == 1:                         #=== single skin
-                for node in allTextureNodes:
-                    if node.type == "TEX_IMAGE":
-                        image = node.image
-                        mdl.skinwidth, mdl.skinheight = image.size
-                        skin = image.name
-                        mdl.skins.append(MD2.Skin(skin))
+    if not len(materials):
+        return
+
+    for mat in materials:
+        allTextureNodes = list(filter(lambda node: node.type == "TEX_IMAGE", mat.node_tree.nodes))
+        if len(allTextureNodes) != 1:
+            continue
+        node = allTextureNodes[0]
+        if node.type == "TEX_IMAGE":
+            image = node.image
+            mdl.skinwidth, mdl.skinheight = image.size
+            skin = image.name
+            mdl.skins.append(MD2.Skin(skin))
 
 def build_tris(meshes):
     stverts = []

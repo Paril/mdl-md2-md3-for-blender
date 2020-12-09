@@ -26,9 +26,9 @@ from mathutils import Vector,Matrix
 from .qfplist import pldata, PListError
 from .quakepal import quakepal
 from .hexen2pal import hexen2pal
-from .quakenorm import map_normal
+from ..quakenorm import map_normal
 from .mdl import MDL
-from .__init__ import SYNCTYPE, EFFECTS
+from ..__init__ import SYNCTYPE, EFFECTS
 
 def check_faces(mesh):
     #Check that all faces are tris because mdl does not support anything else.
@@ -90,14 +90,7 @@ def null_skin(size):
     skin.pixels = bytearray(size[0] * size[1]) # black skin
     return skin
 
-def active_uv(mesh):
-    for uvt in mesh.uv_layers:
-        if uvt.active:
-            return uvt
-    return None
-
 def make_skin(operator, mdl, mesh):
-    uvt = active_uv(mesh)
     mdl.skinwidth, mdl.skinheight = (4, 4)
     skin = null_skin((mdl.skinwidth, mdl.skinheight))
 
@@ -132,19 +125,6 @@ def make_skin(operator, mdl, mesh):
                 mdl.skins.append(skin)                              # add empty skin - no texture nodes
     else:
         mdl.skins.append(skin)                                      # add empty skin - no materials
-
-    '''
-    if (uvt and uvt.data and uvt.data[0].image):
-        image = uvt.data[0].image
-        if (uvt.data[0].image.size[0] and uvt.data[0].image.size[1]):
-            mdl.skinwidth, mdl.skinheight = image.size
-            skin = convert_image(image)
-        else:
-            operator.report({'WARNING'},
-                            "Texture '%s' invalid (missing?)." % image.name)
-    
-    mdl.skins.append(skin)
-    '''
 
 def build_tris(meshes):
     # mdl files have a 1:1 relationship between stverts and 3d verts.

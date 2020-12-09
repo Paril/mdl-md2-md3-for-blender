@@ -322,7 +322,7 @@ class MDL:
         self.stverts = []
         self.tris = []
         self.frames = []
-        pass
+
     def read(self, filepath):
         self.file = open(filepath, "rb")
         self.name = filepath.split('/')[-1]
@@ -330,6 +330,7 @@ class MDL:
         self.ident = self.read_string(4)
         self.version = self.read_int()
         if self.ident not in ["IDPO", "MD16"] or self.version not in [3, 6]:
+            self.file.close()
             return None
         self.scale = self.read_float(3)
         self.scale_origin = self.read_float(3)
@@ -389,3 +390,4 @@ class MDL:
         #write out the frames
         for frame in self.frames:
             frame.write(self)
+        self.file.close()

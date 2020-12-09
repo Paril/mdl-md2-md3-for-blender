@@ -74,7 +74,7 @@ z_group = (
     (Vector((0.4253, 0.6882, 0.5878)), (45,73,138,99,24,158,131,159)) )
 
 def map_normal(n):
-    fn = Vector((abs(n.x),abs(n.y),abs(n.z)));
+    fn = Vector((abs(n.x),abs(n.y),abs(n.z)))
     group = x_group
     if fn.y > fn.x and fn.y > fn.z:
         group = y_group
@@ -95,3 +95,22 @@ def map_normal(n):
     if n.z < 0:
         quadrant += 1
     return group[best][1][quadrant]
+
+# Quake III normal stuff
+from math import pi, cos, sin, atan2, acos
+
+def decode_md3_normal(b):
+    lat = b[1] / 255.0 * 2 * pi
+    lon = b[0] / 255.0 * 2 * pi
+    x = cos(lat) * sin(lon)
+    y = sin(lat) * sin(lon)
+    z = cos(lon)
+    return [ x, y, z ]
+
+def encode_md3_normal(n):
+    x, y, z = n
+    if x == 0 and y == 0:
+        return 0 if z > 0 else ((128 << 8) | 0)
+    lon = int(atan2(y, x) * 255 / (2 * pi)) & 255
+    lat = int(acos(z) * 255 / (2 * pi)) & 255
+    return (lon << 8) | lat

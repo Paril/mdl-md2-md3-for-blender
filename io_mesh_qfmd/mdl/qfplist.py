@@ -30,7 +30,7 @@ class PListError(Exception):
 class pldata:
     def __init__(self, src = ''):
         self.src = src
-        self.pos = 0;
+        self.pos = 0
         self.end = len(self.src)
         self.line = 1
     def skip_space(self):
@@ -93,7 +93,7 @@ class pldata:
                 elif escaped > 1:
                     if escaped == 2 and c == 'x':
                         hexa = True
-                        shring += 1
+                        shrink += 1
                         escaped += 1
                     elif hex and c.isxdigit():
                         shrink += 1
