@@ -128,7 +128,7 @@ class ImportMDL6(bpy.types.Operator, ImportHelper):
         description="Palette")
 
     def execute(self, context):
-        keywords = self.as_keywords (ignore=("filter_glob"))
+        keywords = self.as_keywords (ignore=("filter_glob",))
         return import_mdl.import_mdl(self, context, **keywords)
 
 class ExportMDL6(bpy.types.Operator, ExportHelper):
