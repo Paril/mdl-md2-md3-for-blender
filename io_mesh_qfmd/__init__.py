@@ -43,18 +43,16 @@ if "bpy" in locals():
     imp.reload(export_mdl)
     imp.reload(import_md2)
     imp.reload(export_md2)
-    #imp.reload(import_md3)
+    imp.reload(import_md3)
     imp.reload(export_md3)
 else:
 	from .mdl import import_mdl, export_mdl
 	from .md2 import import_md2, export_md2
-	#from .md3 import import_md3
-	from .md3 import export_md3
+	from .md3 import import_md3, export_md3
 
 # MDL
 import bpy
-from bpy.props import BoolProperty, FloatProperty, StringProperty, EnumProperty
-from bpy.props import FloatVectorProperty, PointerProperty
+from bpy.props import StringProperty, EnumProperty, FloatVectorProperty, PointerProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper, ImportHelper, path_reference_mode, axis_conversion
 
 PALETTE=(
@@ -279,6 +277,20 @@ class QFMD3Settings(bpy.types.PropertyGroup):
         description="Auto-apply location/rotation/scale when exporting",
         default=True)
 
+class ImportMD3(bpy.types.Operator, ImportHelper):
+    '''Load a Quake III MD# File'''
+    bl_idname = "import_mesh.quake3_md3"
+    bl_label = "Import MD3"
+    bl_options = {'PRESET'}
+
+    filename_ext = ".md3"
+    filter_glob = StringProperty(default="*.md3", options={'HIDDEN'})
+
+    def execute(self, context):
+        keywords = self.as_keywords (ignore=("filter_glob",))
+        return import_md3.import_md3(self, context, **keywords)
+
+
 class ExportMD3(bpy.types.Operator, ExportHelper):
     '''Save a Quake III MD3 File'''
     bl_idname = "export_mesh.quake3_md3"
@@ -328,6 +340,7 @@ class OBJECT_PT_MD3Panel(bpy.types.Panel):
 def menu_func_import(self, context):
     self.layout.operator(ImportMDL6.bl_idname, text="Quake MDL (.mdl)")
     self.layout.operator(ImportMD2.bl_idname, text="Quake II MD2 (.md2)")
+    self.layout.operator(ImportMD3.bl_idname, text="Quake III MD3 (.md3)")
 
 def menu_func_export(self, context):
     self.layout.operator(ExportMDL6.bl_idname, text="Quake MDL (.mdl)")
@@ -347,7 +360,7 @@ classes = (
 
     QFMD3Settings,
     OBJECT_PT_MD3Panel,
-    #ImportMD3,
+    ImportMD3,
     ExportMD3
 )
 

@@ -70,6 +70,7 @@ def build_tris(meshes):
     stverts = []
     tris = []
     vuvdict = {}
+    vert_offset = 0
 
     for m in range(len(meshes)):
         uvfaces = meshes[m].uv_layers.active.data
@@ -86,7 +87,9 @@ def build_tris(meshes):
                         stverts.append(MD2.STVert(st))
 
                 # blender's and quake's vertex order are opposed
-                tris.append(MD2.Tri((fv[0], fv[i + 1], fv[i]), (vuvdict[uvs[0]], vuvdict[uvs[1]], vuvdict[uvs[2]])))
+                tris.append(MD2.Tri((fv[0] + vert_offset, fv[i + 1] + vert_offset, fv[i] + vert_offset), (vuvdict[uvs[0]], vuvdict[uvs[1]], vuvdict[uvs[2]])))
+        vert_offset = vert_offset + len(meshes[m].vertices)
+        print(vert_offset)
     return tris, stverts
 
 def convert_stverts(mdl, stverts):
@@ -106,9 +109,6 @@ def make_frame(frame, mesh):
     for mv in mesh.vertices:
         vert = MD2.Vert(tuple(mv.co), map_normal(mv.normal))
         frame.add_vert(vert)
-    frame.calc_scale()
-    frame.scale_verts()
-    return frame
 
 def name_frame(frame_number):
     if bpy.context.object.data.shape_keys:
@@ -160,7 +160,9 @@ def export_md2(
                 if xform:
                     mesh.transform(mdl.obj.matrix_world)
                     mesh.calc_normals_split()
-                frame = make_frame(frame, mesh)
+                make_frame(frame, mesh)
+            frame.calc_scale()
+            frame.scale_verts()
             mdl.frames.append(frame)
 
     convert_stverts(mdl, mdl.stverts)

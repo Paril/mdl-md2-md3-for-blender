@@ -110,7 +110,7 @@ class MD3Vertex:
         self.normal = normal
     def read(self, mdl):
         self.xyz = mdl.read_short(3)
-        self.normal = mdl.read_short()
+        self.normal = mdl.read_ushort()
         return self
     def write(self, mdl):
         mdl.write_short(self.xyz)
@@ -127,10 +127,34 @@ class MD3Surface:
         self.texcoords = []
         self.verts = []
     def read(self, mdl):
+        ident = mdl.read_string(4)
+        if ident != "IDP3":
+            self.file.close()
+            return None
+        self.name = mdl.read_path(MaxPath)
+        self.flags = mdl.read_int()
+
+        num_frames = mdl.read_int()
+        num_shaders = mdl.read_int()
+        num_verts = mdl.read_int()
+        num_triangles = mdl.read_int()
+
+        ofs_triangles = mdl.read_int()
+        ofs_shaders = mdl.read_int()
+        ofs_st = mdl.read_int()
+        ofs_xyznormal = mdl.read_int()
+        ofs_eof = mdl.read_int()
+
+        for _ in range(num_triangles):
+            self.triangles.append(MD3Triangle().read(mdl))
+        for _ in range(num_shaders):
+            self.shaders.append(MD3Shader().read(mdl))
+        for _ in range(num_verts):
+            self.texcoords.append(MD3TexCoord().read(mdl))
+        for _ in range(num_verts * num_frames):
+            self.verts.append(MD3Vertex().read(mdl))
         return self
     def write(self, mdl):
-        surface_offset = mdl.file.tell()
-        
         mdl.write_string(mdl.ident, 4)
         mdl.write_path(self.name, MaxPath)
         mdl.write_int(self.flags)
@@ -185,6 +209,14 @@ class MD3:
         size = 2 * count
         data = self.file.read(size)
         data = unpack("<%dh" % count, data)
+        if count == 1:
+            return data[0]
+        return data
+
+    def read_ushort(self, count=1):
+        size = 2 * count
+        data = self.file.read(size)
+        data = unpack("<%dH" % count, data)
         if count == 1:
             return data[0]
         return data
@@ -269,6 +301,40 @@ class MD3:
 
     def read(self, filepath):
         self.file = open(filepath, "rb")
+        self.ident = self.read_string(4)
+        self.version = self.read_int()
+        if self.ident != "IDP3" or self.version != 15:
+            self.file.close()
+            return None
+
+        self.name = self.read_path(MaxPath)
+        self.flags = self.read_int()
+
+        num_frames = self.read_int()
+        num_tags = self.read_int()
+        num_surfs = self.read_int()
+        self.read_int()
+
+        ofs_frames = self.read_int()
+        ofs_tags = self.read_int()
+        ofs_surfaces = self.read_int()
+        ofs_eof = self.read_int()
+
+        self.file.seek(ofs_frames)
+
+        for _ in range(num_frames):
+            self.frames.append(MD3Frame().read(self))
+
+        self.file.seek(ofs_tags)
+
+        for _ in range(num_tags):
+            self.tags.append(MD3Tag().read(self))
+
+        self.file.seek(ofs_surfaces)
+
+        for _ in range(num_surfs):
+            self.surfaces.append(MD3Surface().read(self))
+
         self.file.close()
         return self
     
