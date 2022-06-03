@@ -56,6 +56,8 @@ def make_skin(operator, mdl, mesh):
         return
 
     for mat in materials:
+        if not mat.use_nodes:
+            continue
         allTextureNodes = list(filter(lambda node: node.type == "TEX_IMAGE", mat.node_tree.nodes))
         if len(allTextureNodes) != 1:
             continue
