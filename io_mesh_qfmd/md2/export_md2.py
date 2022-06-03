@@ -48,7 +48,7 @@ def check_faces(mesh):
     return True
 
 def make_skin(operator, mdl, mesh):
-    mdl.skinwidth, mdl.skinheight = (4, 4)
+    mdl.skinwidth, mdl.skinheight = (512, 512)
 
     materials = bpy.context.object.data.materials
 
